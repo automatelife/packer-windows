@@ -1,4 +1,13 @@
 {
+  "push": {
+      "name": "",
+      "vcs": true
+    },
+    "variables": {
+        "atlas_username": "{{env `ATLAS_USERNAME`}}",
+        "atlas_name": "{{env `ATLAS_NAME`}}",
+        "version": "0.0.1"
+    },
   "builders": [
     {
       "type": "vmware-iso",
@@ -85,11 +94,32 @@
     }
   ],
   "post-processors": [
-    {
-      "type": "vagrant",
-      "keep_input_artifact": false,
-      "output": "windows_7_{{.Provider}}.box",
-      "vagrantfile_template": "vagrantfile-windows_7.template"
-    }
-  ]
+    [{
+            "type": "vagrant",
+            "keep_input_artifact": false,
+            "vagrantfile_template": "vagrantfile-windows_7.template"
+        },
+        {
+            "type": "atlas",
+            "only": ["vmware-iso"],
+            "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
+            "artifact_type": "vagrant.box",
+            "metadata": {
+                "provider": "vmware_desktop",
+                "version": "{{ user `version` }}",
+                "created_at": "{{timestamp}}"
+            }
+        },
+        {
+            "type": "atlas",
+            "only": ["virtualbox-iso"],
+            "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
+            "artifact_type": "vagrant.box",
+            "metadata": {
+                "provider": "virtualbox",
+                "version": "{{ user `version` }}",
+                "created_at": "{{timestamp}}"
+            }
+        }]
+    ]
 }
